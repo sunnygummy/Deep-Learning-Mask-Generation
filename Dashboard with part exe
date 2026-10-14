@@ -1,0 +1,207 @@
+import tkinter as tk
+from tkinter import ttk
+from tkinter import filedialog
+from tkinter import messagebox
+import subprocess
+import sys
+from pathlib import Path
+
+
+# ============================================================
+# GLOBAL VARIABLES
+# ============================================================
+
+folder_path = ""
+destination_path = ""
+
+
+# ============================================================
+# RUN SELECTED PROGRAM
+# ============================================================
+def run_script(script_name):
+
+    script_path = Path(script_name)
+
+    if "VignettingPreprocessingModel" in str(script_path):
+
+        python_exe = (
+            script_path.parent
+            / ".venv"
+            / "Scripts"
+            / "python.exe"
+        )
+
+    else:
+
+        python_exe = Path(sys.executable)
+
+    result = subprocess.run(
+        [
+            str(python_exe),
+            str(script_path),
+            folder_path,
+            "--out",
+            destination_path
+        ],
+        cwd=script_path.parent,
+        capture_output=True,
+        text=True
+    )
+
+    print(result.stdout)
+
+    if result.stderr:
+        print(result.stderr)
+
+# ============================================================
+# SELECT INPUT DIRECTORY
+# ============================================================
+
+def select_directory():
+
+    global folder_path
+
+    folder_path = filedialog.askdirectory(
+        title="Select Input Folder"
+    )
+
+    if folder_path:
+
+        input_label.config(
+            text=f"Input: {folder_path}"
+        )
+
+
+# ============================================================
+# SELECT DESTINATION DIRECTORY
+# ============================================================
+
+def select_destination():
+
+    global destination_path
+
+    destination_path = filedialog.askdirectory(
+        title="Select Destination Folder"
+    )
+
+    if destination_path:
+
+        destination_label.config(
+            text=f"Destination: {destination_path}"
+        )
+
+
+# ============================================================
+# CREATE MAIN WINDOW
+# ============================================================
+
+root = tk.Tk()
+
+root.title("Program Selector")
+
+root.geometry("650x300")
+
+
+# ============================================================
+# PROGRAM SELECTION
+# ============================================================
+
+scripts = [
+    r"C:\Users\VLWeg\Desktop\Research\randombullshitgo\main.py",
+    r"C:\Users\VLWeg\VignettingPreprocessingModel\predict.py"
+]
+
+selected_script = tk.StringVar()
+
+selected_script.set(
+    scripts[0]
+)
+
+
+dropdown = ttk.Combobox(
+    root,
+    width=70,
+    textvariable=selected_script,
+    values=scripts,
+    state="readonly"
+)
+
+dropdown.pack(
+    pady=15
+)
+
+
+# ============================================================
+# INPUT FOLDER
+# ============================================================
+
+select_button = tk.Button(
+    root,
+    text="Choose Input Folder",
+    command=select_directory
+)
+
+select_button.pack(
+    pady=5
+)
+
+
+input_label = tk.Label(
+    root,
+    text="Input: No folder selected",
+    wraplength=600
+)
+
+input_label.pack(
+    pady=5
+)
+
+
+# ============================================================
+# DESTINATION FOLDER
+# ============================================================
+
+destination_button = tk.Button(
+    root,
+    text="Choose Destination Folder",
+    command=select_destination
+)
+
+destination_button.pack(
+    pady=5
+)
+
+
+destination_label = tk.Label(
+    root,
+    text="Destination: No folder selected",
+    wraplength=600
+)
+
+destination_label.pack(
+    pady=5
+)
+
+
+# ============================================================
+# RUN BUTTON
+# ============================================================
+
+run_button = tk.Button(
+    root,
+    text="Run Program",
+    command=lambda: run_script(
+        selected_script.get()
+    )
+)
+
+run_button.pack(
+    pady=15
+)
+
+
+# ============================================================
+# START GUI
+# ============================================================
+
+root.mainloop()
